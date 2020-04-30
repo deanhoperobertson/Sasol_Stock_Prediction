@@ -1,18 +1,28 @@
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 
 
 def close(A,B):
-    if (A["Close"] - B["Close"])>std_close*2:
+    #normal distribution
+    factor = norm.ppf(0.9)
+
+    diff = abs(A["Close"] - B["Close"])
+
+    if diff>std_close*factor:
         return "L"
-    elif (A["Close"] - B["Close"]) <std_close:
+    elif diff <std_close:
         return "S"
     else: return "M"
 
 def volume(A,B):
-    if (A["Volume"] - B["Volume"])>std_vol*2:
+    factor = norm.ppf(0.9)
+
+    diff = abs(A["Volume"] - B["Volume"])
+
+    if diff>std_vol*factor:
         return "L"
-    elif (A["Volume"] - B["Volume"]) <std_vol:
+    elif diff <std_vol:
         return "S"
     else: return "M"
 
@@ -27,18 +37,18 @@ def data2features(data,i):
     return features
 
 def process(data):
-	X_train = []
-	global std_close
-	global std_vol
-	std_close = (data["Close"]-data["Close"].shift(1)).std()
-	std_vol = (data["Volume"]-data["Volume"].shift(1)).std()
+    X_train = []
+    global std_close
+    global std_vol
+    std_close = (data["Close"]-data["Close"].shift(1)).std()
+    std_vol = (data["Volume"]-data["Volume"].shift(1)).std()
 
-	for i in range(1,data.shape[0]):
-	    X_train.append(data2features(data,i))
-	X_train = [X_train]
+    for i in range(1,data.shape[0]):
+        X_train.append(data2features(data,i))
+    X_train = [X_train]
 
-	Y_train=[list(data["Target"].shift(-1))[:-1]]
+    Y_train=[list(data["Target"].shift(-1))[:-1]]
 
-	return X_train,Y_train
+    return X_train,Y_train
 
 
